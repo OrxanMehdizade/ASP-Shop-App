@@ -1,20 +1,25 @@
-﻿using ASP_Shop_App.Models;
+﻿using ASP_Shop_App.Data;
+using ASP_Shop_App.Models;
 using ASP_Shop_App.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ASP_Shop_App.Controllers
 {
     public class UserController : Controller
     {
+        private readonly AppDbContext _appContext;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        
 
-        public UserController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        public UserController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,AppDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _appContext = context;
         }
         public IActionResult Register()
         {
@@ -69,6 +74,18 @@ namespace ASP_Shop_App.Controllers
 
             }
             return View(loginModel);
+        }
+        [HttpGet]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login");
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetAllProducts()
+        {
+            var products=_appContext.Products.ToList();
+            return View(products);
         }
     }
 }

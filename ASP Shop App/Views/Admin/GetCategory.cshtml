@@ -1,0 +1,60 @@
+﻿@model List<Category>
+
+<style>
+    #Category-main-div {
+        padding: 10px;
+        position: relative;
+        width: 18rem;
+    }
+
+        #Category-main-div:hover {
+            border: 2px solid;
+            border-color: white white #007bff white;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 1);
+        }
+
+    .card-text {
+        padding: 5px;
+        text-align: center;
+        margin: 10px auto;
+        width: 10em;
+        font-family: cursive;
+    }
+
+        .card-text:hover {
+            border: 5px solid;
+            border-color: white white #007bff white;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 1);
+            margin-bottom: 10px;
+        }
+
+    .btnAddDiv {
+        width: 100%;
+        text-align: center;
+        padding: 30px;
+    }
+
+    #btnAdd {
+        width: 150px;
+    }
+
+</style>
+
+
+<div>
+    <div class="d-flex  gap-2">
+        @foreach (var item in Model)
+        {
+            <div class="card" id="Category-main-div">
+                <img class="card-img-top" src="@Url.Content($"~/Images/{System.IO.Path.GetFileName(item.ImageUrlCategory)}")" alt="Image Description" />
+                <p class="card-text" onclick="location.href='@Url.Action("GetAll", "Admin", new { categoryId = item.Id })'">@item.Name</p>
+                <a asp-action="DeleteCategory" asp-route-id="@item.Id" class="btn btn-danger" style="margin:20px ">Delete</a>
+                <a asp-controller="Admin" asp-action="UpdateCategory" asp-route-id="@item.Id" class="btn btn-warning">Update</a>
+            </div>
+        }
+    </div>
+    <div class="btnAddDiv">
+        <a asp-controller="Admin" asp-action="Add" id="btnAdd" class="btn btn-success">Add Product</a>
+        <a asp-controller="Admin" asp-action="AddCategory" id="btnAdd" class="btn btn-success">Add Category</a>
+    </div>
+</div>
