@@ -55,30 +55,30 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 
-//var container = app.Services.CreateScope();
-//var userManager = container.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
-//var roleManager = container.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-//if (!await roleManager.RoleExistsAsync("Admin"))
-//{
-//    var result = await roleManager.CreateAsync(new IdentityRole("Admin"));
-//    if (!result.Succeeded) throw new Exception(result.Errors.First().Description);
-//}
+var container = app.Services.CreateScope();
+var userManager = container.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+var roleManager = container.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+if (!await roleManager.RoleExistsAsync("Admin"))
+{
+    var result = await roleManager.CreateAsync(new IdentityRole("Admin"));
+    if (!result.Succeeded) throw new Exception(result.Errors.First().Description);
+}
 
-//var User = await userManager.FindByEmailAsync("admin@admin.com");
-//if (User is null)
-//{
-//    User = new AppUser
-//    {
-//        UserName = "admin@admin.com",
-//        Email = "admin@admin.com",
-//        FullName = "Admin",
-//        EmailConfirmed = true,
-//    };
-//    var result = await userManager.CreateAsync(User, "Admin51!");
-//    if (!result.Succeeded) throw new Exception(result.Errors.First().Description);
-//}
+var User = await userManager.FindByEmailAsync("admin@admin.com");
+if (User is null)
+{
+    User = new AppUser
+    {
+        UserName = "admin@admin.com",
+        Email = "admin@admin.com",
+        FullName = "Admin",
+        EmailConfirmed = true,
+    };
+    var result = await userManager.CreateAsync(User, "Admin51!");
+    if (!result.Succeeded) throw new Exception(result.Errors.First().Description);
+}
 
-//await userManager.AddToRoleAsync(User, "Admin");
+await userManager.AddToRoleAsync(User, "Admin");
 
 
 app.Run();
