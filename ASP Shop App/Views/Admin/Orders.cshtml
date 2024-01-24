@@ -1,0 +1,18 @@
+﻿@model List<OrderViewModel>
+
+<h2>Order</h2>
+
+@foreach (var order in Model)
+{
+    <div>
+        <h3>Order ID: @order.Id</h3>
+        <p>Order Date: @order.CreatedTime</p>
+        <h4>Products:</h4>
+        <ul>
+            @foreach (var product in order.Prodcuts)
+            {
+                <li>@product.Title - $@product.Price</li>
+            }
+        </ul>
+    </div>
+}

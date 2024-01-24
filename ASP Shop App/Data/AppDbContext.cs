@@ -17,28 +17,26 @@ namespace ASP_Shop_App.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Product>()
+                   .HasOne(p => p.Category)
+                   .WithMany(c => c.Products)
+                   .HasForeignKey(p => p.CategoryId)
+                   .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<AppUser>()
-                .HasKey(a => a.Id);
+                .HasKey(x => x.Id);
 
             modelBuilder.Entity<Order>()
-                .HasOne(o => o.User)
-                .WithMany(a => a.Orders)
-                .HasForeignKey(o => o.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<Product>()
-                .HasMany(p => p.Orders)
-                .WithMany(o => o.Products);
-
-            modelBuilder.Entity<Product>()
-                .HasOne(p => p.Category)
-                .WithMany(c => c.Products)
-                .HasForeignKey(p => p.CategoryId)
+                .HasOne(c => c.User)
+                .WithOne(u => u.orders)
+                .HasForeignKey<Order>(c => c.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<AppUser>()
-                .HasMany(a => a.Products)
-                .WithMany(p => p.AppUsers);
+                .HasOne(u => u.orders)
+                .WithOne(c => c.User)
+                .HasForeignKey<AppUser>(u => u.ordersID)
+                .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelBuilder);
         }

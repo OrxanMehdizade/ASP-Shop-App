@@ -8,9 +8,7 @@
         public int CategoryId { get; set; }
         public decimal Price { get; set; }
         public string? ImageUrl { get; set; }
-        public List<Order>? Orders { get; set; }
-
-        public List<AppUser>? AppUsers { get; set; }
+        public ICollection<Order>? Orders { get; set; }
 
 
     }

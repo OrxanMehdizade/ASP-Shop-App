@@ -1,6 +1,7 @@
 ﻿using ASP_Shop_App.Data;
 using ASP_Shop_App.Helpers;
 using ASP_Shop_App.Models;
+using ASP_Shop_App.Models.AutoMappers;
 using ASP_Shop_App.Models.ViewModels;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -218,5 +219,33 @@ namespace ASP_Shop_App.Controllers
             return RedirectToAction("GetCategory");
 
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        [HttpGet]
+        public IActionResult Orders()
+        {
+            var Orders = _context.Orders
+                .Where(o => o.IsOrdered)
+                .Include(o => o.Products)
+            .ToList();
+
+            var orderedViewModels = _automapper.Map<List<OrderViewModel>>(Orders);
+
+            return View(orderedViewModels);
+        }
+
     }
 }

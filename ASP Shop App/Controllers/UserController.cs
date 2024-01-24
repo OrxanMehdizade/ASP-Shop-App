@@ -95,51 +95,42 @@ namespace ASP_Shop_App.Controllers
         [HttpPost]
         public async Task<IActionResult> AddToCartProduct(int id)
         {
+
             var product = await _appContext.Products.FindAsync(id);
 
-            if (product != null)
+            if (product == null) return RedirectToAction("GetAllProducts");
+
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user!.orders is null)
             {
-                // Check if the user is authenticated
-                if (User.Identity.IsAuthenticated)
+                var existingCart = await _appContext.Orders.FirstOrDefaultAsync(c => c.UserId == user.Id);
+
+                if (existingCart != null)
                 {
-                    // Retrieve user ID
-                    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-                    // Retrieve or create a user order
-                    var userOrder = await _appContext.Orders
-                        .Include(o => o.Products)
-                        .FirstOrDefaultAsync(o => o.UserId == userId);
-
-                    if (userOrder == null)
-                    {
-                        // Create a new order if the user doesn't have one
-                        userOrder = new Order
-                        {
-                            UserId = userId,
-                            Products = new List<Product> { product }
-                        };
-
-                        _appContext.Orders.Add(userOrder);
-                    }
-                    else
-                    {
-                        // Add the product to the existing user order
-                        userOrder.Products ??= new List<Product>();
-                        userOrder.Products.Add(product);
-                    }
-
-                    await _appContext.SaveChangesAsync();
+                    user.ordersID = existingCart.Id;
+                    user.orders = existingCart;
                 }
                 else
                 {
-                    // For non-authenticated users, you might want to implement session-based cart logic
-                    // Example: HttpContext.Session.Get<List<Product>>("Cart") ?? new List<Product>();
+                    var newCart = new Order { UserId = user.Id };
+                    user.orders = newCart;
+                    user.ordersID = newCart.Id;
                 }
+            }
+            try
+            {
+                user.orders.Products ??= new List<Product>();
+                user.orders.Products.Add(product);
+
+                await _appContext.SaveChangesAsync();
 
                 return RedirectToAction("GetAllProducts");
             }
-
-            return NotFound();
+            catch (Exception)
+            {
+                return RedirectToAction("GetAllProducts");
+            }
         }
 
 

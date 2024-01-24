@@ -8,13 +8,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddAutoMapper(typeof(Program).Assembly);
-
 builder.Services.AddDbContext<AppDbContext>(op => op.UseSqlServer(
 
     builder.Configuration.GetConnectionString("Default"))
 
     );
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
@@ -63,22 +62,21 @@ if (!await roleManager.RoleExistsAsync("Admin"))
     var result = await roleManager.CreateAsync(new IdentityRole("Admin"));
     if (!result.Succeeded) throw new Exception(result.Errors.First().Description);
 }
-
-var User = await userManager.FindByEmailAsync("admin@admin.com");
-if (User is null)
+var user = await userManager.FindByEmailAsync("admin@admin.com");
+if (user is null)
 {
-    User = new AppUser
+    user = new AppUser
     {
         UserName = "admin@admin.com",
         Email = "admin@admin.com",
         FullName = "Admin",
-        EmailConfirmed = true,
     };
-    var result = await userManager.CreateAsync(User, "Admin51!");
+    user.orders = new() { UserId = user.Id };
+    var result = await userManager.CreateAsync(user, "Admin12!");
     if (!result.Succeeded) throw new Exception(result.Errors.First().Description);
 }
 
-await userManager.AddToRoleAsync(User, "Admin");
+await userManager.AddToRoleAsync(user, "Admin");
 
 
 app.Run();
