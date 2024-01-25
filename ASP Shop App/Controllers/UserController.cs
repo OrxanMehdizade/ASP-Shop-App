@@ -45,7 +45,9 @@ namespace ASP_Shop_App.Controllers
                     FullName = registerModel.FullName,
                     UserName = registerModel.Email
                 };
-                var result=await _userManager.CreateAsync(user, registerModel.Password);
+
+                user.orders = new() { UserId = user.Id };
+                var result =await _userManager.CreateAsync(user, registerModel.Password);
                 if(result.Succeeded)
                 {
                     await _signInManager.SignInAsync(user, false);
@@ -92,13 +94,16 @@ namespace ASP_Shop_App.Controllers
             return View(products);
         }
 
+  
         [HttpPost]
         public async Task<IActionResult> AddToCartProduct(int id)
         {
-
             var product = await _appContext.Products.FindAsync(id);
 
-            if (product == null) return RedirectToAction("GetAllProducts");
+            if (product == null)
+            {
+                return RedirectToAction("GetAllProducts");
+            }
 
             var user = await _userManager.GetUserAsync(User);
 
@@ -116,8 +121,10 @@ namespace ASP_Shop_App.Controllers
                     var newCart = new Order { UserId = user.Id };
                     user.orders = newCart;
                     user.ordersID = newCart.Id;
+                    _appContext.Orders.Add(newCart);
                 }
             }
+
             try
             {
                 user.orders.Products ??= new List<Product>();
@@ -132,6 +139,7 @@ namespace ASP_Shop_App.Controllers
                 return RedirectToAction("GetAllProducts");
             }
         }
+
 
 
     }
