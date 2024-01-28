@@ -40,22 +40,6 @@ namespace ASP_Shop_App.Data
 
             base.OnModelCreating(modelBuilder);
         }
-        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
-        {
-            foreach (var entry in this.ChangeTracker.Entries())
-            {
-                if (entry.Entity is BaseEntity)
-                {
-                    ((BaseEntity)entry.Entity).ModifiedTime = DateTime.Now;
 
-                    if (entry.State == EntityState.Added)
-                    {
-                        ((BaseEntity)entry.Entity).CreatedTime = DateTime.Now;
-                    }
-                }
-            }
-
-            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-        }
     }
 }

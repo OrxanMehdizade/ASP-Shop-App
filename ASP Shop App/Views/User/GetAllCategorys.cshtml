@@ -1,0 +1,43 @@
+﻿@model List<Product>
+
+@{
+    var categories = ViewData["Categories"] as List<Category>;
+}
+
+<div class="flex-column" style="margin-top: 10px;">
+    <div class="col-md-3">
+        <form asp-controller="User" asp-action="GetAllCategorys" method="get">
+            <div class="form-group" >
+                <label for="categoryFilter">Filter by Category:</label>
+                <select class="form-control" id="categoryFilter" name="category">
+                    <option value="">All Categories</option>
+                    @foreach (var category in categories!)
+                    {
+                        <option value="@category.Id">@category.Name</option>
+                    }
+                </select>
+                <button style="margin:20px auto" type="submit" class="btn btn-primary" style="margin-top: 10px">Filter</button>
+            </div>
+            
+        </form>
+    </div>
+    <div class="col-md-9">
+        <div class="row row-cols-1 row-cols-md-4 g-4">
+            @foreach (var item in Model)
+            {
+                <div class="card col mb-4 ml-2" style="width: 18rem; margin-left: 4px;">
+                    <div class="card-body">
+                        <img class="card-img-top" src="@Url.Content($"~/Images/{System.IO.Path.GetFileName(item.ImageUrl)}")" alt="Image Description" />
+                        <h5 class="card-title">@item.Title</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">Price: @item.Price</h6>
+                        <p class="card-text">@item.Category.Name</p>
+                        <p class="card-text">@item.Description</p>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Delete</a>
+                        <a asp-controller="Admin" asp-action="Update" asp-route-id="@item.Id" class="btn btn-warning">Update</a>
+                        <a asp-controller="User" asp-action="AddCart" asp-route-id="@item.Id" class="btn btn-primary">Add To Order</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

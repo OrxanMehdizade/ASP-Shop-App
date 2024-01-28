@@ -1,17 +1,52 @@
 ﻿@model List<OrderViewModel>
 
-<h2>Order</h2>
+<style>
+    .order-card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 15px 0;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
 
+        .order-card h3 {
+            color: #333;
+        }
+
+        .order-card p {
+            color: #666;
+        }
+
+        .order-card h4 {
+            margin-top: 10px;
+            color: #333;
+        }
+
+        .order-card ul {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 5px;
+        }
+
+        .order-card li {
+            color: #555;
+            margin-bottom: 5px;
+        }
+</style>
+
+<div style="margin:0 auto;text-align:center; width:100px">
+    <h2 >Orders</h2>
+</div>
 @foreach (var order in Model)
 {
-    <div>
+    <div class="order-card">
         <h3>Order ID: @order.Id</h3>
         <p>Order Date: @order.CreatedTime</p>
         <h4>Products:</h4>
         <ul>
             @foreach (var product in order.Prodcuts)
             {
-                <li>@product.Title - $@product.Price</li>
+                <li>@product.Title - @product.Price $</li>
             }
         </ul>
     </div>

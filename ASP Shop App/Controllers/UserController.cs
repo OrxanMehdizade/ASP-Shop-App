@@ -2,6 +2,7 @@
 using ASP_Shop_App.Models;
 using ASP_Shop_App.Models.ViewModels;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ASP_Shop_App.Controllers
 {
+    [Authorize]
     public class UserController : Controller
     {
         private readonly AppDbContext _appContext;
@@ -25,15 +27,17 @@ namespace ASP_Shop_App.Controllers
             _appContext = context;
             _automapper = automapper;
         }
+        [AllowAnonymous]
         public IActionResult Register()
         {
             return View();
         }
+        [AllowAnonymous]
         public IActionResult Login()
         {
             return View();
         }
-
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel registerModel)
         {
@@ -60,6 +64,7 @@ namespace ASP_Shop_App.Controllers
             }
             return View (registerModel);
         }
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel loginModel)
         {
@@ -81,12 +86,14 @@ namespace ASP_Shop_App.Controllers
             }
             return View(loginModel);
         }
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
             return RedirectToAction("Login");
         }
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAllProducts()
         {
@@ -94,52 +101,94 @@ namespace ASP_Shop_App.Controllers
             return View(products);
         }
 
-  
-        [HttpPost]
-        public async Task<IActionResult> AddToCartProduct(int id)
+
+        public IActionResult GetAllCategorys(int? category)
+        {
+            var categories = _appContext.Categorys.ToList();
+            ViewData["Categories"] = categories;
+
+            IQueryable<Product> products = _appContext.Products;
+
+            if (category.HasValue && category > 0)
+            {
+                products = products.Where(p => p.CategoryId == category);
+            }
+
+            var productList = products.ToList();
+            return View(productList);
+        }
+
+
+        public async Task<IActionResult> OrderCartAsync()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var cart = await _appContext.Orders
+                .Include(c => c.Products)
+                .FirstOrDefaultAsync(c => c.UserId == user!.Id);
+
+            if (cart != null && !cart.IsOrdered)
+            {
+                var productsInCart = cart.Products.ToList();
+                return View(productsInCart);
+            }
+            return View(new List<Product>());
+        }
+
+
+        public async Task<IActionResult> AddCartAsync(int id)
         {
             var product = await _appContext.Products.FindAsync(id);
 
-            if (product == null)
-            {
-                return RedirectToAction("GetAllProducts");
-            }
+            if (product == null) return RedirectToAction("GetAllCategorys");
 
             var user = await _userManager.GetUserAsync(User);
 
-            if (user!.orders is null)
+            if (user != null)
             {
-                var existingCart = await _appContext.Orders.FirstOrDefaultAsync(c => c.UserId == user.Id);
+                var cart = await _appContext.Orders
+                    .Include(c => c.Products)
+                    .FirstOrDefaultAsync(c => c.UserId == user.Id && !c.IsOrdered);
 
-                if (existingCart != null)
+                if (cart == null)
                 {
-                    user.ordersID = existingCart.Id;
-                    user.orders = existingCart;
+                    cart = new Order { UserId = user.Id };
+                    _appContext.Orders.Add(cart);
                 }
-                else
-                {
-                    var newCart = new Order { UserId = user.Id };
-                    user.orders = newCart;
-                    user.ordersID = newCart.Id;
-                    _appContext.Orders.Add(newCart);
-                }
-            }
 
-            try
-            {
-                user.orders.Products ??= new List<Product>();
-                user.orders.Products.Add(product);
+                cart.Products ??= new List<Product>();
+                cart.Products.Add(product);
 
                 await _appContext.SaveChangesAsync();
 
-                return RedirectToAction("GetAllProducts");
+                return RedirectToAction("GetAllCategorys");
             }
-            catch (Exception)
-            {
-                return RedirectToAction("GetAllProducts");
-            }
+
+            return RedirectToAction("GetAllCategorys");
         }
 
+
+
+
+        public async Task<IActionResult> OrderAsync()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user != null)
+            {
+                var cart = await _appContext.Orders
+                    .Include(c => c.Products)
+                    .FirstOrDefaultAsync(c => c.UserId == user.Id && !c.IsOrdered);
+
+                if (cart != null)
+                {
+                    cart.IsOrdered = true;
+                    cart.Products.Clear();
+                    await _appContext.SaveChangesAsync();
+                }
+            }
+
+            return RedirectToAction("GetAllCategorys");
+        }
 
 
     }
