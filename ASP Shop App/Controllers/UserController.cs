@@ -37,6 +37,13 @@ namespace ASP_Shop_App.Controllers
         {
             return View();
         }
+
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
         [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel registerModel)
@@ -93,6 +100,10 @@ namespace ASP_Shop_App.Controllers
             await _signInManager.SignOutAsync();
             return RedirectToAction("Login");
         }
+
+
+
+
         [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAllProducts()
